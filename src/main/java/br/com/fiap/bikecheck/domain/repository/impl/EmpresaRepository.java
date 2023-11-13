@@ -2,7 +2,7 @@ package br.com.fiap.bikecheck.domain.repository.impl;
 
 import br.com.fiap.bikecheck.domain.entity.Empresa;
 import br.com.fiap.bikecheck.domain.repository.Repository;
-import br.com.fiap.infra.ConnectionFactory;
+import br.com.fiap.bikecheck.infra.ConnectionFactory;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ public class EmpresaRepository implements Repository<Empresa, Long> {
     private static final AtomicReference<EmpresaRepository> instance = new AtomicReference<>();
 
     private EmpresaRepository() {
-        this.connectionFactory = br.com.fiap.infra.ConnectionFactory.build();
+        this.connectionFactory = ConnectionFactory.build();
     }
 
     public static EmpresaRepository build() {
@@ -112,8 +112,8 @@ public class EmpresaRepository implements Repository<Empresa, Long> {
     @Override
     public Empresa persist(Empresa empresa) {
         var sql = "INSERT INTO T_BC_EMPRESA " +
-                " (ID_EMPRESA, NR_CNPJ, NM_EMPRESA, DS_ENDERECO, DS_SEGMENTOS, NR_TELEFONE, DS_EMAIL) " +
-                " values (0, ?, ?, ?, ?, ?, ?)";
+                " (NR_CNPJ, NM_EMPRESA, DS_ENDERECO, DS_SEGMENTOS, NR_TELEFONE, DS_EMAIL) " +
+                " values (?, ?, ?, ?, ?, ?)";
 
         Connection conn = connectionFactory.getConnection();
         PreparedStatement ps = null;

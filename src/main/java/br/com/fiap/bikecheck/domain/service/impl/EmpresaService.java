@@ -8,11 +8,7 @@ import java.util.List;
 
 public class EmpresaService implements Service<Empresa, Long> {
 
-    private EmpresaRepository repository;
-
-    public EmpresaService() {
-        this.repository = EmpresaRepository.build();
-    }
+    private final EmpresaRepository repository = EmpresaRepository.build();
 
     @Override
     public List<Empresa> findAll() {

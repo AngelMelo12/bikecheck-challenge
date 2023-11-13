@@ -8,11 +8,7 @@ import java.util.List;
 
 public class SeguroService implements Service<Seguro, Long> {
 
-    private SeguroRepository repository;
-
-    public SeguroService() {
-        this.repository = SeguroRepository.build();
-    }
+    private final SeguroRepository repository = SeguroRepository.build();
 
     @Override
     public List<Seguro> findAll() {
@@ -22,6 +18,10 @@ public class SeguroService implements Service<Seguro, Long> {
     @Override
     public Seguro findById(Long id) {
         return repository.findById(id);
+    }
+
+    public Seguro findByBicicleta(Long idBicicleta) {
+        return repository.findByBicicleta(idBicicleta);
     }
 
     @Override

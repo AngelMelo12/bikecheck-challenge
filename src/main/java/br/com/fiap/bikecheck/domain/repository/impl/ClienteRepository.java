@@ -2,7 +2,7 @@ package br.com.fiap.bikecheck.domain.repository.impl;
 
 import br.com.fiap.bikecheck.domain.entity.Cliente;
 import br.com.fiap.bikecheck.domain.repository.Repository;
-import br.com.fiap.infra.ConnectionFactory;
+import br.com.fiap.bikecheck.infra.ConnectionFactory;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -117,8 +117,8 @@ public class ClienteRepository implements Repository<Cliente, Long> {
     @Override
     public Cliente persist(Cliente cliente) {
         var sql = "INSERT INTO T_BC_CLIENTE " +
-                " (ID_CLIENTE, NM_CLIENTE, DT_NASCIMENTO, DS_ENDERECO, NR_CPF, NR_TELEFONE, NR_TELEFONE_RESIDENCIAL, DS_EMAIL) " +
-                " values (0, ?, ?, ?, ?, ?, ?, ?)";
+                " (NM_CLIENTE, DT_NASCIMENTO, DS_ENDERECO, NR_CPF, NR_TELEFONE, NR_TELEFONE_RESIDENCIAL, DS_EMAIL) " +
+                " values (?, ?, ?, ?, ?, ?, ?)";
 
         Connection conn = connectionFactory.getConnection();
         PreparedStatement ps = null;

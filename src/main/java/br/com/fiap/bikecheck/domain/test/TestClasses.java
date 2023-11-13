@@ -1,9 +1,9 @@
 package br.com.fiap.bikecheck.domain.test;
 
 import br.com.fiap.bikecheck.domain.entity.*;
+import br.com.fiap.bikecheck.domain.service.impl.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 
 public class TestClasses {
 
@@ -20,26 +20,6 @@ public class TestClasses {
                 "angelica@fiap.com.br"
         );
 
-        var bicicleta = new Bicicleta(
-                1L,
-                "Caloi",
-                LocalDate.now(),
-                40000.0,
-                "Vermelho",
-                "Peças bonitas",
-                new byte[2],
-                new ArrayList<>(),
-                cliente
-        );
-
-        var seguro = new Seguro(
-                1L,
-                LocalDate.now(),
-                "Empresa",
-                cliente,
-                bicicleta
-        );
-
         var empresa = new Empresa(
                 1L,
                 131232131232L,
@@ -50,12 +30,28 @@ public class TestClasses {
                 "empresa@empresa.com.br"
         );
 
+        var bicicleta = new Bicicleta(
+                1L,
+                "Bicicleta",
+                LocalDate.now(),
+                42700.0,
+                "Azul",
+                "Aço",
+                new byte[2]
+        );
+
+        var seguro = new Seguro(
+                1L,
+                LocalDate.now(),
+                "Empresa",
+                cliente,
+                bicicleta
+        );
         var vistoria = new Vistoria(
                 1L,
                 new byte[2],
                 bicicleta,
-                seguro,
-                cliente
+                seguro
         );
 
         System.out.println(cliente);
@@ -63,5 +59,21 @@ public class TestClasses {
         System.out.println(seguro);
         System.out.println(empresa);
         System.out.println(vistoria);
+
+        BicicletaService bicicletaService = new BicicletaService();
+        ClienteService clienteService = new ClienteService();
+        EmpresaService empresaService = new EmpresaService();
+        SeguroService seguroService = new SeguroService();
+        VistoriaService vistoriaService = new VistoriaService();
+
+//        System.out.println(bicicletaService.persist(bicicleta));
+//        System.out.println(clienteService.persist(cliente));
+
+        System.out.println(bicicletaService.findAll());
+        System.out.println(clienteService.findAll());
+        System.out.println(empresaService.findAll());
+        System.out.println(seguroService.findAll());
+        System.out.println(vistoriaService.findAll());
+
     }
 }

@@ -8,11 +8,7 @@ import java.util.List;
 
 public class ClienteService implements Service<Cliente, Long> {
 
-    private ClienteRepository repository;
-
-    public ClienteService() {
-        this.repository = ClienteRepository.build();
-    }
+    private final ClienteRepository repository = ClienteRepository.build();
 
     @Override
     public List<Cliente> findAll() {

@@ -8,11 +8,7 @@ import java.util.List;
 
 public class BicicletaService implements Service<Bicicleta, Long> {
 
-    private BicicletaRepository repository;
-
-    public BicicletaService() {
-        this.repository = BicicletaRepository.build();
-    }
+    private final BicicletaRepository repository = BicicletaRepository.build();
 
     @Override
     public List<Bicicleta> findAll() {

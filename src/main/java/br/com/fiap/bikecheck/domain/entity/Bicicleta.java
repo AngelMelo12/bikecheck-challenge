@@ -3,6 +3,7 @@ package br.com.fiap.bikecheck.domain.entity;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class Bicicleta {
 
@@ -13,13 +14,11 @@ public class Bicicleta {
     private String cor;
     private String descricaoPecas;
     private byte[] fotos;
-    private List<Vistoria> vistorias;
-    private Cliente cliente;
 
     public Bicicleta() {
     }
 
-    public Bicicleta(Long id, String marca, LocalDate dataModelo, Double valor, String cor, String descricaoPecas, byte[] fotos, List<Vistoria> vistorias, Cliente cliente) {
+    public Bicicleta(Long id, String marca, LocalDate dataModelo, Double valor, String cor, String descricaoPecas, byte[] fotos) {
         this.id = id;
         this.marca = marca;
         this.dataModelo = dataModelo;
@@ -27,8 +26,6 @@ public class Bicicleta {
         this.cor = cor;
         this.descricaoPecas = descricaoPecas;
         this.fotos = fotos;
-        this.vistorias = vistorias;
-        this.cliente = cliente;
     }
 
     public Long getId() {
@@ -87,22 +84,6 @@ public class Bicicleta {
         this.fotos = fotos;
     }
 
-    public List<Vistoria> getVistorias() {
-        return vistorias;
-    }
-
-    public void setVistorias(List<Vistoria> vistorias) {
-        this.vistorias = vistorias;
-    }
-
-    public Cliente getCliente() {
-        return cliente;
-    }
-
-    public void setCliente(Cliente cliente) {
-        this.cliente = cliente;
-    }
-
     @Override
     public String toString() {
         return "Bicicleta{" +
@@ -113,22 +94,6 @@ public class Bicicleta {
                 ", cor='" + cor + '\'' +
                 ", descricaoPecas='" + descricaoPecas + '\'' +
                 ", fotos=" + Arrays.toString(fotos) +
-                ", vistorias=" + vistorias.size() +
-                ", cliente=" + cliente.getNome() +
                 '}';
-    }
-
-    public void adicionaVistoria(Vistoria vistoria) {
-        this.vistorias.add(vistoria);
-    }
-
-    public boolean possuiVistoria(Vistoria vistoria) {
-        return vistorias.contains(vistoria);
-    }
-
-    public boolean possuiFotosDaVistoria(Vistoria vistoria) {
-        return vistorias.stream()
-                .map(Vistoria::getFoto)
-                .anyMatch(v -> v == vistoria.getFoto());
     }
 }

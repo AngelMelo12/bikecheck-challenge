@@ -1,5 +1,6 @@
 package br.com.fiap.bikecheck;
 
+import br.com.fiap.bikecheck.infra.ConnectionFactory;
 import br.com.fiap.bikecheck.infra.configuration.CORSFilter;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
@@ -18,16 +19,16 @@ public class Main {
                 // Configure container response filters (CORSFilter)
                 .register(CORSFilter.class)
                 // Configure ConnectionFactory
-                .register(br.com.fiap.infra.ConnectionFactory.build())
+                .register(ConnectionFactory.build())
                 // Configure os pacotes em que temos Recursos da API REST
-                .packages("br.com.fiap.domain.resources");
+                .packages("br.com.fiap.bikecheck.domain.resource");
         return GrizzlyHttpServerFactory.createHttpServer(URI.create(BASE_URI), rc);
     }
 
     public static void main(String[] args) {
         var server = startServer();
         System.out.println(String.format(
-                "App Petshop  🤓👍  started with endpoints available " +
+                "Bike Check started with endpoints available " +
                         "as %s%nHit Ctrl-C to stop it....", BASE_URI));
         try {
             System.in.read();

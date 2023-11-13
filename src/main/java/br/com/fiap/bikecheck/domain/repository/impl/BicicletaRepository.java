@@ -1,14 +1,10 @@
 package br.com.fiap.bikecheck.domain.repository.impl;
 
 import br.com.fiap.bikecheck.domain.entity.Bicicleta;
-import br.com.fiap.bikecheck.domain.entity.Cliente;
-import br.com.fiap.bikecheck.domain.entity.Vistoria;
 import br.com.fiap.bikecheck.domain.repository.Repository;
-import br.com.fiap.bikecheck.domain.service.impl.ClienteService;
-import br.com.fiap.bikecheck.domain.service.impl.VistoriaService;
-import br.com.fiap.infra.ConnectionFactory;
+import br.com.fiap.bikecheck.infra.ConnectionFactory;
 
-import javax.sql.rowset.serial.SerialBlob;
+import java.io.ByteArrayInputStream;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -16,10 +12,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class BicicletaRepository implements Repository<Bicicleta, Long> {
-
-    private VistoriaService vistoriaService = new VistoriaService();
-
-    private ClienteService clienteService = new ClienteService();
 
     private ConnectionFactory connectionFactory;
 
@@ -37,7 +29,7 @@ public class BicicletaRepository implements Repository<Bicicleta, Long> {
 
     @Override
     public List<Bicicleta> findAll() {
-        List<Bicicleta> list = new ArrayList<>();
+        var list = new ArrayList<Bicicleta>();
         Connection con = connectionFactory.getConnection();
         ResultSet rs = null;
         Statement st = null;
@@ -60,10 +52,6 @@ public class BicicletaRepository implements Repository<Bicicleta, Long> {
                     String descricaoPecas = rs.getString("DS_PECAS_BICICLETA");
                     Blob fotosBlob = rs.getBlob("FOTOS");
                     byte[] fotos = fotosBlob.getBytes(1L, (int) fotosBlob.length());
-                    List<Vistoria> vistorias = vistoriaService.findByBicicleta(id);
-                    Vistoria vistoria = vistorias.stream().findAny().orElse(null);
-                    assert vistoria != null;
-                    Cliente cliente = clienteService.findById(vistoria.getCliente().getId());
 
                     list.add(new Bicicleta(
                             id,
@@ -72,9 +60,7 @@ public class BicicletaRepository implements Repository<Bicicleta, Long> {
                             valor,
                             cor,
                             descricaoPecas,
-                            fotos,
-                            vistorias,
-                            cliente)
+                            fotos)
                     );
                 }
             }
@@ -88,6 +74,7 @@ public class BicicletaRepository implements Repository<Bicicleta, Long> {
 
     @Override
     public Bicicleta findById(Long id) {
+
         Bicicleta bicicleta = null;
         var sql = "SELECT * FROM T_BC_BICICLETA where ID_BICICLETA=?";
 
@@ -110,10 +97,6 @@ public class BicicletaRepository implements Repository<Bicicleta, Long> {
                     String descricaoPecas = rs.getString("DS_PECAS_BICICLETA");
                     Blob fotosBlob = rs.getBlob("FOTOS");
                     byte[] fotos = fotosBlob.getBytes(1L, (int) fotosBlob.length());
-                    List<Vistoria> vistorias = vistoriaService.findByBicicleta(id);
-                    Vistoria vistoria = vistorias.stream().findAny().orElse(null);
-                    assert vistoria != null;
-                    Cliente cliente = clienteService.findById(vistoria.getCliente().getId());
 
                     bicicleta = new Bicicleta(
                             id,
@@ -122,9 +105,7 @@ public class BicicletaRepository implements Repository<Bicicleta, Long> {
                             valor,
                             cor,
                             descricaoPecas,
-                            fotos,
-                            vistorias,
-                            cliente);
+                            fotos);
                 }
             }
         } catch (SQLException e) {
@@ -138,8 +119,8 @@ public class BicicletaRepository implements Repository<Bicicleta, Long> {
     @Override
     public Bicicleta persist(Bicicleta bicicleta) {
         var sql = "INSERT INTO T_BC_BICICLETA " +
-                " (ID_BICICLETA, NM_MARCA, DT_MODELO_BICICLETA, VL_BICICLETA, COR, DS_PECAS_BICICLETA, FOTOS) " +
-                " values (0, ?, ?, ?, ?, ?, ?)";
+                " (NM_MARCA, DT_MODELO_BICICLETA, VL_BICICLETA, COR, DS_PECAS_BICICLETA, FOTOS) " +
+                " values (?, ?, ?, ?, ?, ?)";
 
         Connection conn = connectionFactory.getConnection();
         PreparedStatement ps = null;
@@ -151,8 +132,7 @@ public class BicicletaRepository implements Repository<Bicicleta, Long> {
             ps.setDouble(3, bicicleta.getValor());
             ps.setString(4, bicicleta.getCor());
             ps.setString(5, bicicleta.getDescricaoPecas());
-            ps.setBlob(6, new SerialBlob(bicicleta.getFotos()));
-
+            ps.setBlob(6, new ByteArrayInputStream(bicicleta.getFotos()));
             ps.executeUpdate();
 
             final ResultSet rs = ps.getGeneratedKeys();

@@ -1,33 +1,31 @@
 package br.com.fiap.bikecheck.domain.repository.impl;
 
-import br.com.fiap.infra.ConnectionFactory;
 import br.com.fiap.bikecheck.domain.entity.Bicicleta;
-import br.com.fiap.bikecheck.domain.entity.Cliente;
+import br.com.fiap.bikecheck.domain.entity.Seguro;
 import br.com.fiap.bikecheck.domain.entity.Vistoria;
 import br.com.fiap.bikecheck.domain.repository.Repository;
 import br.com.fiap.bikecheck.domain.service.impl.BicicletaService;
-import br.com.fiap.bikecheck.domain.service.impl.ClienteService;
 import br.com.fiap.bikecheck.domain.service.impl.SeguroService;
+import br.com.fiap.bikecheck.infra.ConnectionFactory;
 
+import javax.sql.rowset.serial.SerialBlob;
 import java.sql.*;
-import java.sql.Date;
-import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class VistoriaRepository implements Repository<Vistoria, Long> {
 
-    private BicicletaService bicicletaService = new BicicletaService();
+    private final BicicletaService bicicletaService;
+    private final SeguroService seguroService;
 
-    private ClienteService clienteService = new ClienteService();
-
-    private SeguroService seguroService = new SeguroService();
-
-    private ConnectionFactory connectionFactory;
+    private final ConnectionFactory connectionFactory;
 
     private static final AtomicReference<VistoriaRepository> instance = new AtomicReference<>();
 
     private VistoriaRepository() {
+        this.bicicletaService = new BicicletaService();
+        this.seguroService = new SeguroService();
         this.connectionFactory = ConnectionFactory.build();
     }
 
@@ -39,12 +37,14 @@ public class VistoriaRepository implements Repository<Vistoria, Long> {
 
     @Override
     public List<Vistoria> findAll() {
+
+
         List<Vistoria> list = new ArrayList<>();
         Connection con = connectionFactory.getConnection();
         ResultSet rs = null;
         Statement st = null;
 
-        var sql = "SELECT * FROM T_BC_SEGURO";
+        var sql = "SELECT * FROM T_BC_VISTORIA";
 
         try {
             st = con.createStatement();
@@ -53,20 +53,19 @@ public class VistoriaRepository implements Repository<Vistoria, Long> {
             if (rs.isBeforeFirst()) {
                 while (rs.next()) {
 
-                    Long id = rs.getLong("ID_SEGURO");
-                    LocalDate dataContratacao = rs.getDate("DT_CONTRATACAO_SEGURO").toLocalDate();
-                    String nome = rs.getString("NM_EMPRESA");
-                    Long idCliente = rs.getLong("ID_CLIENTE");
+                    Long id = rs.getLong("ID_VISTORIA");
+                    Blob fotosBlob = rs.getBlob("FOTOS");
+                    byte[] fotos = fotosBlob.getBytes(1L, (int) fotosBlob.length());
                     Long idBicicleta = rs.getLong("ID_BICICLETA");
-                    Cliente cliente = clienteService.findById(idCliente);
                     Bicicleta bicicleta = bicicletaService.findById(idBicicleta);
+                    Long idSeguro = rs.getLong("ID_SEGURO");
+                    Seguro seguro = seguroService.findById(idSeguro);
 
                     list.add(new Vistoria(
                             id,
-                            dataContratacao,
-                            nome,
-                            cliente,
-                            bicicleta)
+                            fotos,
+                            bicicleta,
+                            seguro)
                     );
                 }
             }
@@ -80,8 +79,10 @@ public class VistoriaRepository implements Repository<Vistoria, Long> {
 
     @Override
     public Vistoria findById(Long id) {
+        BicicletaRepository bicicletaRepository = BicicletaRepository.build();
+        SeguroRepository seguroRepository = SeguroRepository.build();
         Vistoria vistoria = null;
-        var sql = "SELECT * FROM T_BC_EMPRESA where ID_EMPRESA=?";
+        var sql = "SELECT * FROM T_BC_VISTORIA where ID_VISTORIA=?";
 
         Connection conn = connectionFactory.getConnection();
         PreparedStatement ps = null;
@@ -95,19 +96,18 @@ public class VistoriaRepository implements Repository<Vistoria, Long> {
             if (rs.isBeforeFirst()) {
                 while (rs.next()) {
 
-                    LocalDate dataContratacao = rs.getDate("DT_CONTRATACAO_SEGURO").toLocalDate();
-                    String nome = rs.getString("NM_EMPRESA");
-                    Long idCliente = rs.getLong("ID_CLIENTE");
+                    Blob fotosBlob = rs.getBlob("FOTOS");
+                    byte[] fotos = fotosBlob.getBytes(1L, (int) fotosBlob.length());
                     Long idBicicleta = rs.getLong("ID_BICICLETA");
-                    Cliente cliente = clienteService.findById(idCliente);
-                    Bicicleta bicicleta = bicicletaService.findById(idBicicleta);
+                    Bicicleta bicicleta = bicicletaRepository.findById(idBicicleta);
+                    Long idSeguro = rs.getLong("ID_SEGURO");
+                    Seguro seguro = seguroRepository.findById(idSeguro);
 
-                    vistoria = new Vistoria(
+                     return new Vistoria(
                             id,
-                            dataContratacao,
-                            nome,
-                            cliente,
-                            bicicleta);
+                            fotos,
+                            bicicleta,
+                            seguro);
                 }
             }
         } catch (SQLException e) {
@@ -118,11 +118,51 @@ public class VistoriaRepository implements Repository<Vistoria, Long> {
         return vistoria;
     }
 
+    public List<Vistoria> findBySeguro(Long idSeguro) {
+        BicicletaRepository bicicletaRepository = BicicletaRepository.build();
+        SeguroRepository seguroRepository = SeguroRepository.build();
+        List<Vistoria> list = new ArrayList<>();
+        Connection con = connectionFactory.getConnection();
+        ResultSet rs = null;
+        Statement st = null;
+
+        var sql = "SELECT * FROM T_BC_VISTORIA WHERE ID_SEGURO=?";
+
+        try {
+            st = con.createStatement();
+            rs = st.executeQuery(sql);
+
+            if (rs.isBeforeFirst()) {
+                while (rs.next()) {
+
+                    Long id = rs.getLong("ID_VISTORIA");
+                    Blob fotosBlob = rs.getBlob("FOTOS");
+                    byte[] fotos = fotosBlob.getBytes(1L, (int) fotosBlob.length());
+                    Long idBicicleta = rs.getLong("ID_BICICLETA");
+                    Bicicleta bicicleta = bicicletaRepository.findById(idBicicleta);
+                    Seguro seguro = seguroRepository.findById(idSeguro);
+
+                    list.add(new Vistoria(
+                            id,
+                            fotos,
+                            bicicleta,
+                            seguro)
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Não foi possível consultar as vistorias");
+        } finally {
+            fecharObjetos(rs, st, con);
+        }
+        return list;
+    }
+
     @Override
     public Vistoria persist(Vistoria vistoria) {
-        var sql = "INSERT INTO T_BC_SEGURO " +
-                " (ID_SEGURO, DT_CONTRATACAO_SEGURO, NM_EMPRESA, ID_CLIENTE, ID_BICICLETA) " +
-                " values (0, ?, ?, ?, ?)";
+        var sql = "INSERT INTO T_BC_VISTORIA " +
+                " (ID_VISTORIA, FOTOS, ID_BICICLETA, ID_SEGURO) " +
+                " values (0, ?, ?, ?)";
 
         Connection conn = connectionFactory.getConnection();
         PreparedStatement ps = null;
@@ -130,10 +170,9 @@ public class VistoriaRepository implements Repository<Vistoria, Long> {
         try {
 
             ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            ps.setDate(1, Date.valueOf(vistoria.getDataContratacao()));
-            ps.setString(2, vistoria.getNomeEmpresa());
-            ps.setLong(3, vistoria.getCliente().getId());
-            ps.setLong(4, vistoria.getBicicleta().getId());
+            ps.setBlob(1, new SerialBlob(vistoria.getFoto()));
+            ps.setLong(2, vistoria.getBicicleta().getId());
+            ps.setLong(3, vistoria.getSeguro().getId());
             ps.executeUpdate();
 
             final ResultSet rs = ps.getGeneratedKeys();

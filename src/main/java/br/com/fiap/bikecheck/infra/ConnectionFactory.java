@@ -1,4 +1,4 @@
-package br.com.fiap.infra;
+package br.com.fiap.bikecheck.infra;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
